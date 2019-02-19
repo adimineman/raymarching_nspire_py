@@ -1,6 +1,6 @@
 from PIL import Image,ImageDraw
 import math as m
-loop=2
+loop=1
 paintLoop=1
 hit=.01
 toRad=lambda x:x/360*m.pi*2
@@ -8,27 +8,30 @@ toDeg=lambda x:x/(m.pi*2)*360
 mod  =lambda x,y:(1 if x>=0 else -1)*(((1 if x>=0 else -1)*x)%y)
 map  =lambda x,xmin,xmax,ymin,ymax:(x-xmin)/(xmax-xmin)*(ymax-ymin)+ymin
 
-w=10000
-h=5000
+w=int(10000/2)
+h=int(w/2)
 
 circle=lambda x,y,z,r:x**2+y**2+z**2-r**2
-cube  =lambda x,y,z,r:x**100+y**100+z**100-r**100
+cube  =lambda x,y,z,r:x**10+y**10+z**10-r**10
 more  =lambda v1,v2:(v2+v1)
 less  =lambda v1,v2:-(v2+v1)
 
 chess =lambda x,y,z,c1,c2:c1 if (m.floor(x*10)+m.floor(y*10)+m.floor(z*10))%2==0 else c2
 mapC  =lambda c1,c2,p:(int(map(p,0,1,c1[0],c2[0])),int(map(p,0,1,c1[1],c2[1])),int(map(p,0,1,c1[2],c2[2])))
 
-camera={"multi":w*h,"rez":1,"dir":[toRad(0),toRad(90)],"poz":[-2,0,0],"fov":toRad(360)/2,"Sx":0,"Sy":0,"back":lambda x,y,z:(0,0,0),"maxStep":250}
+camera={"multi":w*h,"rez":1,"dir":[toRad(0),toRad(90)],"poz":[-3,0,0],"fov":toRad(360)/2,"Sx":0,"Sy":0,
+        "back":lambda x,y,z:chess(x/10,y/10,z/10,(150,150,150),(200,200,200)),"maxStep":50}
 objects=[
-[lambda x,y,z:circle(x-2,y%1,z,1),
-lambda x,y,z:mapC((225,125,200),(125,240,225),(y)%1)],
-[lambda x,y,z:more(z,2),
-lambda x,y,z:chess(x,y,z,(0,0,0),(255,255,255))],
-[lambda x,y,z:less(z,-2),
-lambda x,y,z:chess(x,y,z,(50,50,255),(120,120,255))],
-[lambda x,y,z:less(x,-2),
-lambda x,y,z:chess(x,y,z,(255,100,100),(255,150,150))]
+[lambda x,y,z:cube(x,((y+1)%3)-1,((z+1)%3)-1,1),
+lambda x,y,z:mapC((225,125,200),(125,240,225),(x**2+(y%2-1)**2+(z%2-1)**2)*.50)],
+#[lambda x,y,z:more(z,2),
+#lambda x,y,z:chess(x,y,z,(0,0,0),(255,255,255))],
+#[lambda x,y,z:less(z,-2),
+#lambda x,y,z:chess(x,y,z,(50,50,255),(120,120,255))],
+[lambda x,y,z:less(x,-4),
+lambda x,y,z:chess(x,y,z,(255,100,100),(255,150,150))],
+[lambda x,y,z:more(x,7),
+lambda x,y,z:chess(x,y,z,(100,255,100),(150,255,150))]
 ]
 
 def matadd(a,b):
@@ -61,6 +64,7 @@ class window:
             for x in range(paintLoop):
                 paint(self.gc)
                 self.g.save("render.png","PNG")
+                self.g.save("render.jpg","JPEG")
                 if loop==0:break
             inp=input("|")
             if inp=="lo":paintLoop=int(eval(input(">")))
@@ -138,7 +142,7 @@ def render(gc,camera,objects):
                     global loop
                     loop=0
                 break
-        if x%1000==0: print(int(x/camera["multi"]*1000))
+        if x%int(camera["multi"]*.001)==0: print(int(x/camera["multi"]*1000)/10)
 
 def __main__():
     global screen
