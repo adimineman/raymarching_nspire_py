@@ -8,7 +8,7 @@ toDeg=lambda x:x/(m.pi*2)*360
 mod  =lambda x,y:(1 if x>=0 else -1)*(((1 if x>=0 else -1)*x)%y)
 map  =lambda x,xmin,xmax,ymin,ymax:(x-xmin)/(xmax-xmin)*(ymax-ymin)+ymin
 
-w=int(10000/2)
+w=int(1000)
 h=int(w/2)
 
 circle=lambda x,y,z,r:x**2+y**2+z**2-r**2
@@ -33,7 +33,7 @@ lambda x,y,z:chess(x,y,z,(255,100,100),(255,150,150))],
 [lambda x,y,z:more(x,7),
 lambda x,y,z:chess(x,y,z,(100,255,100),(150,255,150))]
 ]
-
+'''
 def matadd(a,b):
     a=a.copy()
     for y in range(len(b)):
@@ -42,7 +42,7 @@ def matadd(a,b):
     return a
 def matmul(a,b):
     rez=[]
-    for i in range(len(b)):
+    for j in range(len(b)):
         rez[j]=[]
         for k in range(len(a[0])):
             sum=0
@@ -50,7 +50,7 @@ def matmul(a,b):
                 sum+=a[i][k]*b[j][i]
             rez[j].push(sum)
     return rez
-
+'''
 class window:
     def __init__(self,w,h):
         self.width=w
@@ -122,19 +122,19 @@ class ray:
 def render(gc,camera,objects):
     if camera["rez"]<1: camera["rez"]=1
     #if camera["Sy"]==0 and camera["Sx"]==0:gc.fill(0)
-    yFov=screen.height/screen.width*camera["fov"]
+    yFov=h/w*camera["fov"]
 #    yFov=toRad(180)
     for x in range(camera["multi"]):
-        xDir=map(camera["Sx"],0,screen.width,-camera["fov"],camera["fov"])+camera["dir"][0]
-        yDir=map(camera["Sy"],0,screen.height,-yFov,yFov)+camera["dir"][1]
+        xDir=map(camera["Sx"],0,w,-camera["fov"],camera["fov"])+camera["dir"][0]
+        yDir=map(camera["Sy"],0,h,-yFov,yFov)+camera["dir"][1]
         r=ray(camera["poz"].copy(),[xDir,yDir],camera["back"],camera["maxStep"])
         r.move(objects)
         gc.point((camera["Sx"],camera["Sy"]),fill=r.color)
         camera["Sx"]+=camera["rez"]
-        if camera["Sx"]>= screen.width:
+        if camera["Sx"]>= w:
             camera["Sx"]=0
             camera["Sy"]+=camera["rez"]
-            if camera["Sy"]>=screen.height:
+            if camera["Sy"]>=h:
                 camera["Sx"]=0
                 camera["Sy"]=0
                 camera["rez"]=camera["rez"]//2
@@ -145,7 +145,7 @@ def render(gc,camera,objects):
         if x%int(camera["multi"]*.001)==0: print(int(x/camera["multi"]*1000)/10)
 
 def __main__():
-    global screen
+#    global screen
     screen=window(w,h)
     screen.draw()
 
