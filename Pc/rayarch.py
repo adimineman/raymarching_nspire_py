@@ -3,13 +3,13 @@ import math as m
 loop=1
 paintLoop=1
 hit=1e-3
-max_dist=10
+max_dist=50
 toRad=lambda x:x/360*m.pi*2
 toDeg=lambda x:x/(m.pi*2)*360
 mod  =lambda x,y:(1 if x>=0 else -1)*(((1 if x>=0 else -1)*x)%y)
 map  =lambda x,xmin,xmax,ymin,ymax:(x-xmin)/(xmax-xmin)*(ymax-ymin)+ymin
 
-w=int(500)
+w=int(10000)
 h=int(w/2)
 
 circle=lambda x,y,z,r:x**2+y**2+z**2-r**2
@@ -20,11 +20,11 @@ less  =lambda v1,v2:-(v2+v1)
 chess =lambda x,y,z,c1,c2:c1 if (m.floor(x*10)+m.floor(y*10)+m.floor(z*10))%2==0 else c2
 mapC  =lambda c1,c2,p:(int(map(p,0,1,c1[0],c2[0])),int(map(p,0,1,c1[1],c2[1])),int(map(p,0,1,c1[2],c2[2])))
 
-camera={"multi":w*h,"rez":1,"dir":[toRad(0),toRad(90)],"poz":[0,0,0],"fov":toRad(360)/2,"Sx":0,"Sy":0,
-        "back":lambda x,y,z:(0,0,0),"maxStep":10}
+camera={"multi":w*h,"rez":1,"dir":[toRad(0),toRad(90)],"poz":[-0,0,0],"fov":toRad(360)/2,"Sx":0,"Sy":0,
+        "back":lambda x,y,z:(0,0,0),"maxStep":100}
 objects=[
-[lambda x,y,z:circle(x+2,y,z,1),
-lambda x,y,z:(255,0,0)],#mapC((225,125,200),(125,240,225),(x**2+(y%2-1)**2+(z%2-1)**2)*.50)],
+#[lambda x,y,z:circle(x,y,z+1.2,1),
+#lambda x,y,z:mapC((225,125,200),(125,240,225),0)],
 
 [lambda x,y,z:more(z,5),
 lambda x,y,z:chess(x,y,z,(162,240,235),(94,144,78))],
@@ -104,14 +104,12 @@ class ray:
     def getDist(self,objects):
         minL=100
         for ob in objects:
-#            ob=objects[o]
             a=ob[0](self.poz[0],self.poz[1],self.poz[2])
             if a<minL :
                 minL=a
                 if a<hit:
                     self.isHit=1
                     self.color=ob[1](self.poz[0],self.poz[1],self.poz[2])
-#                    if self.color[0]%1!=0 or self.color[1]%1!=0 or self.color[2]%1!=0:print(o)
                     break
         self.spd=minL
         self.dist+=minL
