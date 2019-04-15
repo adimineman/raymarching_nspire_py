@@ -1,3 +1,6 @@
+import math as m
+
+
 def toRad(x): return x/360*m.pi*2
 
 
@@ -12,6 +15,7 @@ def map(x, xmin, xmax, ymin, ymax): return (
 
 
 def const(x, minX, maxX): return min(maxX, max(x, minX))
+
 
 def circle(x, y, z, r): return m.sqrt(x**2+y**2+z**2)-r
 
