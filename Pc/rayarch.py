@@ -3,8 +3,8 @@ import random as rand
 import math as m
 from funct import *
 hit = 1e-2
-max_dist = 30
-max_step = 100
+max_dist = 20
+max_step = 50
 
 
 w = int(4000)
@@ -14,14 +14,14 @@ h = int(w/2)
 camera = {"dir": [toRad(0), toRad(90)], "poz": [0, 0, 0], "fovX": toRad(360), "fovY": toRad(180),
           "back": lambda ray: mapC((255, 255, 255), (100, 50, 150), ray.dist/max_dist)}
 objects = [
-    [lambda ray:cube(ray.poz[0]-2, ((ray.poz[1]+2) % 4)-2, ((ray.poz[2]+2) % 4)-2, 1, 10),
+    [lambda ray:circle(ray.poz[0]-2, ((ray.poz[1]+2) % 4)-2, ((ray.poz[2]+2) % 4)-2, 1),
      lambda ray:mapC((225, 125, 200), (125, 240, 225), (ray.poz[1]+1) % 4)
      ],
 
-    # [lambda ray:more(ray.poz[2], 5),
+    #[lambda ray:more(ray.poz[2], 5+m.cos(ray.poz[0])*m.cos(ray.poz[1])),
     #lambda ray:(int(ray.poz[0]*ray.poz[0]+ray.poz[1]*ray.poz[1])*10,)*3
-    # chess(ray.poz[0],ray.poz[1],ray.poz[2],(162,240,235),(94,144,78))
-    # ],
+    #chess(ray.poz[0],ray.poz[1],ray.poz[2],(162,240,235),(94,144,78))
+     #],
     # [lambda ray:less(ray.poz[2], -5),
     # lambda ray:chess(ray.poz[0], ray.poz[1], ray.poz[2], (50, 50, 255), (120, 120, 255))],
 
