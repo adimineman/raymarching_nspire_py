@@ -3,11 +3,10 @@ import random as rand
 import math as m
 from funct import *
 hit = 1e-2
-max_dist = 20
-max_step = 50
+max_dist = 75
+max_step = 500
 
-
-w = int(4000)
+w = int(5000)
 h = int(w/2)
 
 
@@ -15,7 +14,7 @@ camera = {"dir": [toRad(0), toRad(90)], "poz": [0, 0, 0], "fovX": toRad(360), "f
           "back": lambda ray: mapC((255, 255, 255), (100, 50, 150), ray.dist/max_dist)}
 objects = [
     [lambda ray:circle(ray.poz[0]-2, ((ray.poz[1]+2) % 4)-2, ((ray.poz[2]+2) % 4)-2, 1),
-     lambda ray:mapC((225, 125, 200), (125, 240, 225), (ray.poz[1]+1) % 4)
+     lambda ray:mapC((225, 125, 200), (125, 240, 225), (ray.poz[1]+2) % 4-1)
      ],
 
     #[lambda ray:more(ray.poz[2], 5+m.cos(ray.poz[0])*m.cos(ray.poz[1])),
@@ -46,6 +45,7 @@ class ray:
 
     def __init__(self, poz, direc, back):
         self.poz = poz
+        self.direc=direc
         self.Vx = m.sin(direc[1])*m.cos(direc[0])
         self.Vy = m.sin(direc[1])*m.sin(direc[0])
         self.Vz = m.cos(direc[1])
@@ -78,7 +78,7 @@ class ray:
             self.dist += self.spd
         if self.isHit:
             self.color = mapC(self.color, (0, 0, 0),
-                              self.stepsDone/(max_step*2))
+                              self.stepsDone/300)
         if not self.isHit:
             self.color = self.back(self)
 
@@ -100,6 +100,5 @@ def __main__():
             g.save("render.png", "PNG")
     g.save("render.png", "PNG")
     g.save("render.jpg", "JPEG")
-
 
 __main__()
