@@ -1,5 +1,12 @@
 import math as m
+import random as r
 
+mainSeed=0
+
+def rand(minX,maxX,seed):
+    r.seed(seed+mainSeed)
+    for a in range(5):r.seed(r.random()*500)
+    return r.random()*(maxX-minX)+minX
 
 def toRad(x): return x/360*m.pi*2
 

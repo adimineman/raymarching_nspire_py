@@ -1,26 +1,28 @@
 from PIL import Image, ImageDraw
-import random as rand
 import math as m
+import time as t
 from funct import *
-hit = 1e-2
-max_dist = 75
-max_step = 500
+hit = 1e-3
+max_dist = 30
+max_step = 200
 
-w = int(5000)
+w = int(10000)
 h = int(w/2)
 
 
-camera = {"dir": [toRad(0), toRad(90)], "poz": [0, 0, 0], "fovX": toRad(360), "fovY": toRad(180),
-          "back": lambda ray: mapC((255, 255, 255), (100, 50, 150), ray.dist/max_dist)}
+camera = {"dir": [toRad(0), toRad(90)], "poz": [2, 2, 2], "fovX": toRad(360), "fovY": toRad(180),
+          "back": lambda ray: (20, 20, 20)}
+
 objects = [
-    [lambda ray:circle(ray.poz[0]-2, ((ray.poz[1]+2) % 4)-2, ((ray.poz[2]+2) % 4)-2, 1),
-     lambda ray:mapC((225, 125, 200), (125, 240, 225), (ray.poz[1]+2) % 4-1)
+    [lambda ray:circle((ray.poz[0]+2) % 4-2, (ray.poz[1]+2) % 4-2, (ray.poz[2]+2) % 4-2, 1),
+     lambda ray:mapC((225, 125, 200), (125, 240, 225), (abs(
+         ray.poz[0])+abs(ray.poz[1])+abs(ray.poz[2]))/5 % 1)
      ],
 
-    #[lambda ray:more(ray.poz[2], 5+m.cos(ray.poz[0])*m.cos(ray.poz[1])),
+    # [lambda ray:more(ray.poz[2], 5+m.cos(ray.poz[0])*m.cos(ray.poz[1])),
     #lambda ray:(int(ray.poz[0]*ray.poz[0]+ray.poz[1]*ray.poz[1])*10,)*3
-    #chess(ray.poz[0],ray.poz[1],ray.poz[2],(162,240,235),(94,144,78))
-     #],
+    # chess(ray.poz[0],ray.poz[1],ray.poz[2],(162,240,235),(94,144,78))
+    # ],
     # [lambda ray:less(ray.poz[2], -5),
     # lambda ray:chess(ray.poz[0], ray.poz[1], ray.poz[2], (50, 50, 255), (120, 120, 255))],
 
@@ -29,10 +31,10 @@ objects = [
     # [lambda ray:less(ray.poz[1], -5),
     # lambda ray:chess(ray.poz[0], ray.poz[1], ray.poz[2], (226, 66, 168), (90, 121, 161))],
 
-    [lambda ray:more(ray.poz[0], 5),
-     lambda ray:chess(ray.poz[0], ray.poz[1], ray.poz[2], (255, 100, 100), (255, 150, 150))],
-    [lambda ray:less(ray.poz[0], -5),
-     lambda ray:chess(ray.poz[0], ray.poz[1], ray.poz[2], (100, 255, 100), (150, 255, 150))]
+    # [lambda ray:more(ray.poz[0], 5),
+    # lambda ray:chess(ray.poz[0], ray.poz[1], ray.poz[2], (255, 100, 100), (255, 150, 150))],
+    # [lambda ray:less(ray.poz[0], -5),
+    # lambda ray:chess(ray.poz[0], ray.poz[1], ray.poz[2], (100, 255, 100), (150, 255, 150))]
 ]
 
 
@@ -45,7 +47,7 @@ class ray:
 
     def __init__(self, poz, direc, back):
         self.poz = poz
-        self.direc=direc
+        self.direc = direc
         self.Vx = m.sin(direc[1])*m.cos(direc[0])
         self.Vy = m.sin(direc[1])*m.sin(direc[0])
         self.Vz = m.cos(direc[1])
@@ -86,6 +88,7 @@ class ray:
 def __main__():
     g = Image.new("RGB", (w, h))
     gc = ImageDraw.Draw(g)
+    startT=t.time()
     for y in range(h):
         for x in range(w):
             xDir = map(x, 0, w, -camera["fovX"]/2,
@@ -95,10 +98,11 @@ def __main__():
             r = ray(camera["poz"].copy(), [xDir, yDir], camera["back"])
             r.move(objects)
             gc.point((x, y), fill=r.color)
-        print(y, "/", h)
-        if y % 500 == 0:
+        print(y, "/", h,"  ~",((t.time()-startT)//(y+1)*(h-y+1))/60)
+        if y % (h//20) == 0:
             g.save("render.png", "PNG")
     g.save("render.png", "PNG")
     g.save("render.jpg", "JPEG")
+
 
 __main__()
