@@ -6,7 +6,7 @@ On pc all that you nead is the Pillow library
 This project requires mycro python and ndless on your calculator. It draws a picture on your screen
 Objects are defined as an array of arrays witch look like [lambda x,y,z:return distance from object, lambda x,y,z: return color(white=0b1111111111111111)]
 
-commands are:<br>
+Nspire commands are:<br>
 <blockquote>poz: set camera pozition [x,y,z]<br>
 dir: set camera direction in radians ([x direction in radians,y direction in radians])<br>
 exe: execute code for debuging (i use exe >>>print(data))<br>
