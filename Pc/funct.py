@@ -8,6 +8,8 @@ def rand(minX,maxX,seed):
     for a in range(5):r.seed(r.random()*500)
     return r.random()*(maxX-minX)+minX
 
+
+
 def toRad(x): return x/360*m.pi*2
 
 
@@ -24,7 +26,7 @@ def map(x, xmin, xmax, ymin, ymax): return (
 def const(x, minX, maxX): return min(maxX, max(x, minX))
 
 
-def circle(x, y, z, r): return m.sqrt(x**2+y**2+z**2)-r
+def circle(x, y, z, r): return m.sqrt(x*x+y*y+z*z)-r
 
 
 def cube(x, y, z, r, a): return (x**a+y**a+z**a)**(1/a)-r

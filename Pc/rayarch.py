@@ -11,13 +11,11 @@ h = int(w/2)
 
 
 camera = {"dir": [toRad(0), toRad(90)], "poz": [2, 2, 2], "fovX": toRad(360), "fovY": toRad(180),
-          "back": lambda ray: (20, 20, 20)}
+          "back": lambda ray: mapC((150,10,150),(0,0,0),const(ray.absMinDist,0,1))}
 
 objects = [
     [lambda ray:circle((ray.poz[0]+2) % 4-2, (ray.poz[1]+2) % 4-2, (ray.poz[2]+2) % 4-2, 1),
-     lambda ray:mapC((225, 125, 200), (125, 240, 225), (abs(
-         ray.poz[0])+abs(ray.poz[1])+abs(ray.poz[2]))/5 % 1)
-     ],
+     lambda ray:mapC((225, 125, 200), (125, 240, 225), (m.sin(ray.poz[0]*10)*m.sin(ray.poz[1]*10)*m.sin(ray.poz[2]*10))/2+.5)]
 
     # [lambda ray:more(ray.poz[2], 5+m.cos(ray.poz[0])*m.cos(ray.poz[1])),
     #lambda ray:(int(ray.poz[0]*ray.poz[0]+ray.poz[1]*ray.poz[1])*10,)*3
@@ -57,6 +55,7 @@ class ray:
         minL = 100
         for ob in objects:
             a = ob[0](self)
+            if a < self.absMinDist:self.absMinDist=a
             if a < minL:
                 minL = a
                 if a < hit:
@@ -85,7 +84,7 @@ class ray:
             self.color = self.back(self)
 
 
-def __main__():
+def main():
     g = Image.new("RGB", (w, h))
     gc = ImageDraw.Draw(g)
     startT=t.time()
@@ -98,11 +97,11 @@ def __main__():
             r = ray(camera["poz"].copy(), [xDir, yDir], camera["back"])
             r.move(objects)
             gc.point((x, y), fill=r.color)
-        print(y, "/", h,"  ~",((t.time()-startT)//(y+1)*(h-y+1))/60)
-        if y % (h//20) == 0:
+        print(y, "/", h,"  ~",((t.time()-startT)/(y+1)*(h-y+1)/60))
+        if y % (h//10) == 0:
             g.save("render.png", "PNG")
     g.save("render.png", "PNG")
     g.save("render.jpg", "JPEG")
 
 
-__main__()
+main()
