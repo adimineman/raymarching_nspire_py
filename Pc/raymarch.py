@@ -3,22 +3,22 @@ import math as m
 import time as t
 import numpy as np
 from funct import *
-hit = 1e-6
-max_dist = 200
-max_step = 3000
+hit = 1e-5
+max_dist = 8
+max_step = 200
 
-w = int(2**10)
+w = int(2**12)
 h = int(w)
-#global tmp
+global tmp
 
 camera = {"dir": [m.radians(0), m.radians(90)], "poz": [0, 0, 0], "fovX": m.radians(360), "fovY": m.radians(180),
-          "back": lambda ray: mapC((150,10,150),(0,0,0),const(ray.absMinDist,0,1))}
+          "back": lambda ray: mapC((150,10,150),(0,0,0),ray.absMinDist)}
 
 objects = [
-    [lambda ray:cube(Ladd(Lmod(Ladd(ray.poz,(-4,-4,1.1)),(0,0,2.2)),(0,0,-1.1)), (1,1,1)),
-     lambda ray:mapC((114,229,239), (21,78,86), (m.sin(ray.poz[0]*10)*m.sin(ray.poz[1]*10)/2+.5))],
-    [lambda ray:circle(Ladd(ray.poz,(2,2,0)), 1),
-     lambda ray:mapC((225, 125, 200), (125, 240, 225), (m.sin(ray.poz[0]*10)*m.sin(ray.poz[1]*10)*m.sin(ray.poz[2]*10))/2+.5)],
+    [lambda ray:cube(rZm(m.radians(tmp))@np.array(Ladd(Lmod(Ladd(ray.poz,(4,4,1.1)),(0,0,2.2)),(0,0,-1.1))), (1,1,1)),
+     lambda ray:chess(rXm(m.radians(45))@np.array(ray.poz),(0,0,0),(200,200,200))],
+    #[lambda ray:circle(Ladd(Lmod(Ladd(ray.poz,(-2,1,0)),(0,2,0)),(0,-1,0)), 1),
+    # lambda ray:mapC((225, 125, 200), (125, 240, 225), (m.sin(ray.poz[0]*10)*m.sin(ray.poz[1]*10)*m.sin(ray.poz[2]*10))/2+.5)],
 
     # [lambda ray:more(ray.poz[2], 5+m.cos(ray.poz[0])*m.cos(ray.poz[1])),
     #lambda ray:(int(ray.poz[0]*ray.poz[0]+ray.poz[1]*ray.poz[1])*10,)*3
@@ -50,11 +50,11 @@ class ray:
         self.vel = vel
         self.back = back
 
-    def getDist(self, objects):
+    def getDist(self, objects, mids_d=False):
         minL = 100
         for ob in objects:
             a = ob[0](self)
-            if a < self.absMinDist:self.absMinDist=a
+            if not mids_d and a < self.absMinDist:self.absMinDist=a
             if a < minL:
                 minL = a
                 if a < hit:
@@ -65,16 +65,18 @@ class ray:
 
     def getNorm(self,objects):
         ppoz=self.poz.copy()
-        d = self.getDist(objects)
+        self.getDist(objects)
+        d = self.spd
         e = .001
         n=[]
         for x in range(len(ppoz)):
             self.poz=ppoz.copy()
             self.poz[x]-=e
-            n.append(self.getDist(objects))
-        n = Ladd(Lmul(-1),d)
+            self.getDist(objects,True)
+            n.append(self.spd)
+        n = Laddn(Lmuln(n,-1),d)
         self.poz=ppoz
-        return n
+        return norm(n)
 
     def move(self, objects):
         for a in range(max_step):
@@ -84,13 +86,13 @@ class ray:
             if self.isHit:
                 break
             r = self.spd
-            self.poz=Ladd(self.poz,Lmul(self.vel,r))
+            self.poz=Ladd(self.poz,Lmuln(self.vel,r))
             self.stepsDone += 1
             self.dist += self.spd
         if self.isHit:
             self.color = mapC(self.color, (0, 0, 0),
-                              self.stepsDone/300)
-        if not self.isHit:
+                              self.stepsDone/200)
+        else:
             self.color = self.back(self)
 
 
@@ -106,16 +108,17 @@ def main(filename:str):
             r = ray(camera["poz"].copy(), norm(rotmat@np.array((u,v,1))), camera["back"])
             r.move(objects)
             gc.point((x, y), fill=r.color)
-            print(r.getNorm(objects))
-        print(y, "/", h,"  ~",((t.time()-startT)/(y+1)*(h-y+1)))
-        if y % (h//10) == 0:
-            g.save("render.png", "PNG")
+        print(filename,y, "/", h,"  ~",((t.time()-startT)/(y+1)*(h-y+1)))
+        #if y % (h//10) == 0:
+        #    g.save("render.png", "PNG")
     g=g.resize((max(512,w),max(512,h)),resample=Image.NEAREST)
     g.save(filename, "PNG")
     #g.save("render.jpg", "JPEG")
 
-for x in range(0,360,90):
+
+for x in range(0,90,10):
     #global tmp
-    camera["dir"][0]=m.radians(mapr(x,0,360,135,180))
-    #tmp=mapr(x,0,360,0,8)
-    main("render/r{}.png".format(x))
+    camera["dir"][0]=m.radians(-45)
+    #camera["dir"][1]=m.radians(90)
+    tmp=x
+    main("Pc/render/r{:0>5}.png".format(x))
