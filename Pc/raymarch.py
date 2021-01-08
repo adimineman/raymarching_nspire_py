@@ -1,22 +1,41 @@
-from PIL import Image, ImageDraw
+from PIL import Image
 import math as m
 import time as t
 import numpy as np
 from funct import *
-hit = 1e-5
-max_dist = 8
-max_step = 200
+hit = 1e-4
+max_dist = 50
+max_step = 50
 
-w = int(2**12)
+w = int(2**7)
 h = int(w)
 global tmp
 
-camera = {"dir": [m.radians(0), m.radians(90)], "poz": [0, 0, 0], "fovX": m.radians(360), "fovY": m.radians(180),
+camera = {"dir": [m.radians(-45), m.radians(90)], "poz": [0, 0, 0],"zplane":.9,
           "back": lambda ray: mapC((150,10,150),(0,0,0),ray.absMinDist)}
 
 objects = [
-    [lambda ray:cube(rZm(m.radians(tmp))@np.array(Ladd(Lmod(Ladd(ray.poz,(4,4,1.1)),(0,0,2.2)),(0,0,-1.1))), (1,1,1)),
-     lambda ray:chess(rXm(m.radians(45))@np.array(ray.poz),(0,0,0),(200,200,200))],
+    [lambda ray:
+        cube(
+            Ladd(
+                rZm(m.radians(tmp))@
+                np.array(
+                    Ladd(
+                        Lmod(
+                            Ladd(
+                                ray.poz,
+                                (4,4,1.1)
+                            ),
+                            (8,8,2.2)
+                        ),
+                        (-4,-4,-1.1)
+                    )
+                ),
+                (2,2,0)
+            ),
+            (1,1,1)
+        ),
+     lambda ray:mapC((225, 125, 200), (125, 240, 225), (m.sin(ray.poz[0]*10)*m.sin(ray.poz[1]*10)*m.sin(ray.poz[2]*10))/2+.5)],#chess(rXm(m.radians(45))@np.array(ray.poz),(0,0,0),(200,200,200))],
     #[lambda ray:circle(Ladd(Lmod(Ladd(ray.poz,(-2,1,0)),(0,2,0)),(0,-1,0)), 1),
     # lambda ray:mapC((225, 125, 200), (125, 240, 225), (m.sin(ray.poz[0]*10)*m.sin(ray.poz[1]*10)*m.sin(ray.poz[2]*10))/2+.5)],
 
@@ -98,27 +117,28 @@ class ray:
 
 def main(filename:str):
     g = Image.new("RGB", (w, h))
-    gc = ImageDraw.Draw(g)
+    gc = g.load()
     startT=t.time()
     for y in range(h):
         for x in range(w):
             u = mapr(x, 0, w, -1, 1)
             v = mapr(y, 0, h, -1, 1)
             rotmat=rXm(camera["dir"][1])@rYm(camera["dir"][0])
-            r = ray(camera["poz"].copy(), norm(rotmat@np.array((u,v,1))), camera["back"])
+            r = ray(camera["poz"].copy(), norm(rotmat@np.array((u,v,camera["zplane"]))), camera["back"])
             r.move(objects)
-            gc.point((x, y), fill=r.color)
+            gc[x,y]=r.color
         print(filename,y, "/", h,"  ~",((t.time()-startT)/(y+1)*(h-y+1)))
-        #if y % (h//10) == 0:
-        #    g.save("render.png", "PNG")
+        if y % (h//10) == 0:
+            g.save("render.png", "PNG")
     g=g.resize((max(512,w),max(512,h)),resample=Image.NEAREST)
     g.save(filename, "PNG")
     #g.save("render.jpg", "JPEG")
+    g.close()
 
 
-for x in range(0,90,10):
-    #global tmp
-    camera["dir"][0]=m.radians(-45)
+for x in range(0,90,5):
+    global tmp
+    #camera["poz"][1]=mapr(x,0,90,0,2.2)
     #camera["dir"][1]=m.radians(90)
-    tmp=x
+    tmp=x+1
     main("Pc/render/r{:0>5}.png".format(x))
